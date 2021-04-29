@@ -5,17 +5,15 @@
 
     <div id="tododiv" class="header">
       <h1>Hallo Placeholder, dies deine Todo List</h1>
-      <input type="text" id="todoInput" placeholder="Todo...">
-      <div class="addBtn">Add todo</div>
+      <input type="text" id="todoInput" v-model="textinput" placeholder="Todo...">
+      <div class="addBtn" @click="createTask">Add todo</div>
     </div>
-    <ul>
-      <li>fdsd</li>
-      <li>fdsd</li>
-      <li>fdsd</li>
-      <li>fdsd</li>
+    <ul id="todos">
+      <div v-for="todo in apidata" :key="todo.id">
+        <li class="checked" v-if="!todo.done"><div @click="updateTask(todo.id)">{{todo.description}}<font-awesome-icon icon="check" /></div><div @click="deleteTask(todo.id)"><font-awesome-icon icon="trash"/></div></li>
+        <li v-else><div @click="updateTask(todo.id)">{{todo.description}}</div><font-awesome-icon icon="trash" @click="deleteTask(todo.id)"/></li>
+      </div>
     </ul>
-
-
 </template>
 
 <script>
@@ -26,7 +24,8 @@ export default {
   data() {
     return {
       name: "Vue.js",
-      apidata: []
+      apidata: [],
+      textinput: ""
     }   
   },
   methods: {
@@ -36,20 +35,50 @@ export default {
       .get('http://localhost:8000/todos/')
       .then(response => t.apidata = response.data)
     },
-    setToDone(id) {
+    createTask() {
       const t = this;
+      const data = {
+        "owner": 1,
+        "name": "markus",
+        "description": this.textinput,
+        "done": false
+      }
+      axios.post("http://localhost:8000/todos/", data)
+      .then(() => {
+        t.apidata.push(data)
+        console.log("added")
+      })
+    },
+    deleteTask(id) {
+      const t = this;
+      console.log(id)
       axios
       .delete(`http://localhost:8000/todos/${id}/`)
-      .then((response) => {
-        console.log(response)
+      .then(() => {
           const idx = this.apidata.findIndex(x => x.id === id)
-          this.apidata.splice(idx, 1)
-          t.apidata.splice(id-1, 1)
+          console.log(idx)
+          t.apidata.splice(idx, 1)
       })
-      .catch((error) => {
-        console.log(error)
+    },
+     updateTask(id) {
+       const t = this;
+       const idx = t.apidata.findIndex(x => x.id === id)
+       console.log(id)
+       const data = {
+         "owner": 1,
+         "name": "Markus",
+         "text": "walk the dog",
+         "done": false
+       }
+    axios
+    .put(`http://localhost:8000/todos/${id}/`, data)
+    .then(() => {
+     t.apidata[idx].done = !t.apidata[idx].done
+    })
+    .catch((error) => {
+      console.log(error)
       })
-    }
+     }
   }
 }
 </script>
@@ -90,8 +119,6 @@ ul {
   margin: 0;
   padding: 0;
 }
-/* 
-https://www.w3schools.com/howto/howto_js_todolist.asp */
 
 /* Style the list items */
 ul li {
@@ -101,13 +128,15 @@ ul li {
   background: #eee;
   font-size: 18px;
   transition: 0.2s;
+  display: flex;
+  justify-content: space-between;
 
   /* make the list items unselectable */
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
+}  
 
 /* Set all odd list items to a different color (zebra-stripes) */
 ul li:nth-child(odd) {
@@ -126,18 +155,16 @@ ul li.checked {
   text-decoration: line-through;
 }
 
-/* Add a "checked" mark when clicked on */
-ul li.checked::before {
-  content: '';
-  position: absolute;
-  border-color: #fff;
-  border-style: solid;
-  border-width: 0 2px 2px 0;
-  top: 10px;
-  left: 16px;
-  transform: rotate(45deg);
-  height: 15px;
-  width: 7px;
+.fa-trash {
+  font-size: 20px;
+}
+
+.fa-trash:hover {
+  color: red;
+}
+
+.fa-check {
+  margin-left: 10px;
 }
 
 
