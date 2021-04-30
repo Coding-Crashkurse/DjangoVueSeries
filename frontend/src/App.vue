@@ -1,18 +1,24 @@
 <template>
   <NavBar></NavBar>
   <HelloWorld></HelloWorld>
+  <Register></Register>
+  <Login></Login>
 
 </template>
 
 <script>
 import HelloWorld from './components/HelloWorld.vue'
 import NavBar from './components/NavBar.vue'
+import Register from './components/Register.vue'
+import Login from './components/Login.vue'
 
 export default {
   name: 'App',
   components: {
     HelloWorld,
-    NavBar
+    NavBar,
+    Register,
+    Login
   }
 }
 </script>

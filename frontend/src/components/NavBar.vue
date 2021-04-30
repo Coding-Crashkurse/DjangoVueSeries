@@ -2,7 +2,7 @@
 <nav id="nav">
     <h1>ToDoApp</h1>
     <ul id="navbar">
-        <li><a href="">Register</a></li>
+        <li><a href="">Home</a></li>
         <li><a href="">Login</a></li>
     </ul>
 </nav>

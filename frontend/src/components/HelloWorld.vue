@@ -1,106 +1,123 @@
 <template>
-<div class="wrapper">
+  <div class="wrapper">
     <div id="tododiv" class="header">
-      <h1 v-if="allTodos">Hallo Placeholder, du hast {{allTodos}} Todos, {{openTodos}} davon sind noch offen!</h1>
-      <h1 v-else>Hallo Placeholder, du hast noch keine Todos, lege unten ein Todo an.</h1>
-      <input type="text" id="todoInput" v-model="textinput" placeholder="Todo...">
+      <h1 v-if="allTodos">
+        Hallo Placeholder, du hast {{ allTodos }} Todos, {{ openTodos }} davon
+        sind noch offen!
+      </h1>
+      <h1 v-else>
+        Hallo Placeholder, du hast noch keine Todos, lege unten ein Todo an.
+      </h1>
+      <input
+        type="text"
+        id="todoInput"
+        v-model="textinput"
+        placeholder="Todo..."
+      />
       <div class="addBtn" @click="createTask">Add todo</div>
     </div>
     <ul id="todos">
       <div v-for="todo in apidata" :key="todo.id">
-        <li class="checked" v-if="todo.done"><div @click="updateTask(todo.id)">{{todo.description}}<font-awesome-icon icon="check" /></div><div @click="deleteTask(todo.id)"><font-awesome-icon icon="trash"/></div></li>
-        <li v-else><div @click="updateTask(todo.id)">{{todo.description}}</div><font-awesome-icon icon="trash" @click="deleteTask(todo.id)"/></li>
+        <li class="checked" v-if="todo.done">
+          <div @click="updateTask(todo.id)">
+            {{ todo.description }}<font-awesome-icon icon="check" />
+          </div>
+          <div @click="deleteTask(todo.id)">
+            <font-awesome-icon icon="trash" />
+          </div>
+        </li>
+        <li v-else>
+          <div @click="updateTask(todo.id)">{{ todo.description }}</div>
+          <font-awesome-icon icon="trash" @click="deleteTask(todo.id)" />
+        </li>
       </div>
     </ul>
-    <h2 id="todo_done" v-if="allTodos > 0 && openTodos === 0">Gratuliere, du hast deine Todos erfolgreich abgeschlossen!</h2>
-</div>
-
+    <h2 id="todo_done" v-if="allTodos > 0 && openTodos === 0">
+      Gratuliere, du hast deine Todos erfolgreich abgeschlossen!
+    </h2>
+  </div>
 </template>
 
 <script>
-import axios from 'axios'
+import axios from "axios";
 
 export default {
-  name: 'HelloWorld',
+  name: "HelloWorld",
   data() {
     return {
       name: "Vue.js",
       apidata: [],
-      textinput: ""
-    }   
+      textinput: "",
+    };
   },
   mounted() {
-    this.getData()
+    this.getData();
   },
   methods: {
     getData() {
       const t = this;
       axios
-      .get('http://localhost:8000/todos/')
-      .then(response => t.apidata = response.data)
+        .get("http://localhost:8000/todos/")
+        .then((response) => (t.apidata = response.data));
     },
     createTask() {
       const t = this;
       const data = {
-        "owner": 1,
-        "name": "markus",
-        "description": this.textinput,
-        "done": false
-      }
-      axios.post("http://localhost:8000/todos/", data)
-      .then(() => {
-        t.getData()
-      })
+        owner: 1,
+        name: "markus",
+        description: this.textinput,
+        done: false,
+      };
+      axios.post("http://localhost:8000/todos/", data).then(() => {
+        t.getData();
+      });
     },
     deleteTask(id) {
       const t = this;
-      axios
-      .delete(`http://localhost:8000/todos/${id}/`)
-      .then(() => {
-        t.getData()
-      })
+      axios.delete(`http://localhost:8000/todos/${id}/`).then(() => {
+        t.getData();
+      });
     },
-     updateTask(id) {
-       const t = this;
-       const idx = t.apidata.findIndex(x => x.id === id)
-       const data = {
-        "owner": this.apidata[idx].owner,
-        "name": this.apidata[idx].name,
-        "description": this.apidata[idx].description,
-        "done": !this.apidata[idx].done
-      }
+    updateTask(id) {
+      const t = this;
+      const idx = t.apidata.findIndex((x) => x.id === id);
+      const data = {
+        owner: this.apidata[idx].owner,
+        name: this.apidata[idx].name,
+        description: this.apidata[idx].description,
+        done: !this.apidata[idx].done,
+      };
       axios
-      .put(`http://localhost:8000/todos/${id}/`, data)
-      .then(() => {
-        t.getData()
-      })
-      .catch((error) => {
-        console.log(error)
+        .put(`http://localhost:8000/todos/${id}/`, data)
+        .then(() => {
+          t.getData();
         })
-      }
+        .catch((error) => {
+          console.log(error);
+        });
+    },
   },
-  computed:  {
+  computed: {
     openTodos() {
-      return this.apidata.filter(x => !x.done).length
+      return this.apidata.filter((x) => !x.done).length;
     },
     allTodos() {
-      return this.apidata.length
-    }
-  }
-}
+      return this.apidata.length;
+    },
+  },
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
 /* Style the header */
 .wrapper {
-    width: 80%;
-    position: absolute;
-    top: 200px;
-    left: 50%;
-    transform: translate(-50%, 0);
-    border: 1px solid black;
+  width: 80%;
+  position: absolute;
+  top: 200px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  border: 1px solid black;
 }
 
 .header {
@@ -153,7 +170,7 @@ ul li {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}  
+}
 
 /* Set all odd list items to a different color (zebra-stripes) */
 ul li:nth-child(odd) {
@@ -190,5 +207,4 @@ ul li.checked {
   padding: 10px 0px;
   text-align: center;
 }
-
 </style>
