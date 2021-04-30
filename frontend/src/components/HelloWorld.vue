@@ -1,19 +1,20 @@
 <template>
-    <div class="button" @click="getData">
-      Get my Data
-    </div>
-
+<div class="wrapper">
     <div id="tododiv" class="header">
-      <h1>Hallo Placeholder, dies deine Todo List</h1>
+      <h1 v-if="allTodos">Hallo Placeholder, du hast {{allTodos}} Todos, {{openTodos}} davon sind noch offen!</h1>
+      <h1 v-else>Hallo Placeholder, du hast noch keine Todos, lege unten ein Todo an.</h1>
       <input type="text" id="todoInput" v-model="textinput" placeholder="Todo...">
       <div class="addBtn" @click="createTask">Add todo</div>
     </div>
     <ul id="todos">
       <div v-for="todo in apidata" :key="todo.id">
-        <li class="checked" v-if="!todo.done"><div @click="updateTask(todo.id)">{{todo.description}}<font-awesome-icon icon="check" /></div><div @click="deleteTask(todo.id)"><font-awesome-icon icon="trash"/></div></li>
+        <li class="checked" v-if="todo.done"><div @click="updateTask(todo.id)">{{todo.description}}<font-awesome-icon icon="check" /></div><div @click="deleteTask(todo.id)"><font-awesome-icon icon="trash"/></div></li>
         <li v-else><div @click="updateTask(todo.id)">{{todo.description}}</div><font-awesome-icon icon="trash" @click="deleteTask(todo.id)"/></li>
       </div>
     </ul>
+    <h2 id="todo_done" v-if="allTodos > 0 && openTodos === 0">Gratuliere, du hast deine Todos erfolgreich abgeschlossen!</h2>
+</div>
+
 </template>
 
 <script>
@@ -27,6 +28,9 @@ export default {
       apidata: [],
       textinput: ""
     }   
+  },
+  mounted() {
+    this.getData()
   },
   methods: {
     getData() {
@@ -45,40 +49,43 @@ export default {
       }
       axios.post("http://localhost:8000/todos/", data)
       .then(() => {
-        t.apidata.push(data)
-        console.log("added")
+        t.getData()
       })
     },
     deleteTask(id) {
       const t = this;
-      console.log(id)
       axios
       .delete(`http://localhost:8000/todos/${id}/`)
       .then(() => {
-          const idx = this.apidata.findIndex(x => x.id === id)
-          console.log(idx)
-          t.apidata.splice(idx, 1)
+        t.getData()
       })
     },
      updateTask(id) {
        const t = this;
        const idx = t.apidata.findIndex(x => x.id === id)
-       console.log(id)
        const data = {
-         "owner": 1,
-         "name": "Markus",
-         "text": "walk the dog",
-         "done": false
-       }
-    axios
-    .put(`http://localhost:8000/todos/${id}/`, data)
-    .then(() => {
-     t.apidata[idx].done = !t.apidata[idx].done
-    })
-    .catch((error) => {
-      console.log(error)
+        "owner": this.apidata[idx].owner,
+        "name": this.apidata[idx].name,
+        "description": this.apidata[idx].description,
+        "done": !this.apidata[idx].done
+      }
+      axios
+      .put(`http://localhost:8000/todos/${id}/`, data)
+      .then(() => {
+        t.getData()
       })
-     }
+      .catch((error) => {
+        console.log(error)
+        })
+      }
+  },
+  computed:  {
+    openTodos() {
+      return this.apidata.filter(x => !x.done).length
+    },
+    allTodos() {
+      return this.apidata.length
+    }
   }
 }
 </script>
@@ -87,6 +94,15 @@ export default {
 <style scoped>
 
 /* Style the header */
+.wrapper {
+    width: 80%;
+    position: absolute;
+    top: 200px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    border: 1px solid black;
+}
+
 .header {
   background-color: darkorange;
   padding: 20px 50px;
@@ -101,6 +117,7 @@ input {
   width: 75%;
   padding: 10px;
   font-size: 16px;
+  margin: 15px 0px;
 }
 
 /* Style the "Add" button */
@@ -167,5 +184,11 @@ ul li.checked {
   margin-left: 10px;
 }
 
+#todo_done {
+  background: green;
+  color: white;
+  padding: 10px 0px;
+  text-align: center;
+}
 
 </style>
