@@ -43,9 +43,10 @@ export default {
         password: this.password
       };
       axios.post("http://localhost:8000/api/token/", data)
-      .then(() => {
-        // console.log(response.data.access)
-        t.$store.state.userName = data.username
+      .then((response) => {
+        t.$store.commit("saveAccessToken", response.data.access)
+        t.$store.commit("saveRefreshToken", response.data.refresh)
+        t.$store.commit("setUserName", data.username)  
         t.loginmessage = true
         setTimeout(() => { 
            t.loginmessage = false

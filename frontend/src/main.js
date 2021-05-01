@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { createRouter, createWebHashHistory} from "vue-router";
 import { createStore } from "vuex";
 
-import HelloWorld from "./components/HelloWorld"
+import TodoView from "./components/TodoView"
 import LoginView from "./components/LoginView"
 
 library.add(faTrash);
@@ -21,21 +21,32 @@ const store = createStore({
     state() {
         return {
             accessToken: "",
+            refreshToken: "",
             userName: "",
-            loginView: false,
-            loggedIn: true
+            loginView: true,
+            loggedIn: false
         }
     },
     mutations: {
-        login(state, token) {
+        saveAccessToken(state, token) {
+            window.localStorage.setItem("todotoken", token)
             state.accessToken = token
+        },
+        saveRefreshToken(state, refreshtoken) {
+            state.refreshToken = refreshtoken
+        },
+        setUserName(state, name) {
+            window.localStorage.setItem("todo_username", name)
+            state.userName = name
+        },
+        setLogin(state, login) {
+            state.loggedIn = login
         }
     }
-
 })
 
 const routes = [
-    {path: "/", component: HelloWorld},
+    {path: "/", component: TodoView},
     {path: "/login", component: LoginView},
 ]
 

@@ -1,12 +1,12 @@
 <template>
-  <div class="wrapper">
+  <div class="wrapper" v-if="$store.state.loggedIn">
     <div id="tododiv" class="header">
       <h1 v-if="allTodos">
         Hallo {{$store.state.userName}}, du hast {{ allTodos }} Todos, {{ openTodos }} davon
         sind noch offen!
       </h1>
       <h1 v-else>
-        Hallo Placeholder, du hast noch keine Todos, lege unten ein Todo an.
+        Hallo {{$store.state.userName}}, du hast noch keine Todos, lege unten ein Todo an.
       </h1>
       <input
         type="text"
@@ -15,6 +15,7 @@
         placeholder="Todo..."
       />
       <div class="addBtn" @click="createTask">Add todo</div>
+      <div class="addBtn" id="logout_btn" @click="logout">Logout</div>
     </div>
     <ul id="todos">
       <div v-for="todo in apidata" :key="todo.id">
@@ -36,10 +37,16 @@
       Gratuliere, du hast deine Todos erfolgreich abgeschlossen!
     </h2>
   </div>
+  <div class="wrapper" v-else>
+    <h1 id="notloggedin">Um die App nutzen zu können, lege bitte einen Account an oder logge dich ein!</h1>
+  </div>
+  <!-- <h3>{{$store.state.accessToken}}</h3>
+  <h3>{{decoded_token}}</h3> -->
 </template>
 
 <script>
 import axios from "axios";
+import jwt_decode from "jwt-decode";
 
 export default {
   name: "HelloWorld",
@@ -48,33 +55,94 @@ export default {
       name: "Vue.js",
       apidata: [],
       textinput: "",
+      decoded_token: "",
     };
   },
-  mounted() {
+  created() {
+    const t = this;
+
+    const username = window.localStorage.getItem("todo_username")
+    t.$store.commit("setUserName", username)
+
+    const token = window.localStorage.getItem("todotoken")
+    t.$store.commit("saveAccessToken", token)
+    this.checkToken(token)
     this.getData();
+    setInterval(() => {
+      t.checkToken(t.$store.state.accessToken)
+    }, 3000)
   },
   methods: {
+    logout() {
+      this.$store.commit("setLogin", false)
+      this.$store.commit("saveAccessToken", "")
+      this.$store.commit("saveRefreshToken", "")
+      // this.$router.push({path: "/login"})
+    },
+    checkToken(token) {
+      const t = this;
+      if (typeof token !== "undefined" && token.length > 0) { // token initialisiert als leerer String
+        let exp = ""
+        try {
+          exp = jwt_decode(token).exp
+          const now = Date.now() / 1000
+          const diff = exp - now
+          this.decoded_token = diff
+          // console.log(diff)
+          // console.log(this.$store.state.refreshToken)
+
+          if(diff > 0) {
+            t.$store.commit("setLogin", true)
+          }
+          if (diff < 30) {
+            const data = {
+              refresh: this.$store.state.refreshToken
+            }
+            if(this.$store.state.refreshToken !== "") {
+              axios.post("http://localhost:8000/api/token/refresh/", data)
+              .then((response) => {
+                t.$store.commit("saveAccessToken", response.data.access)
+                t.$store.commit("setLogin", true)
+              })
+              .catch((error) => {
+                console.log(error)
+              })
+            }
+          }
+          if(diff < 0) {
+            t.$store.commit("setLogin", false)
+          }
+        } 
+        catch(e) {
+          t.$store.commit("setLogin", false)
+        }
+      } else {
+        this.$store.commit("setLogin", false)
+      }
+    },
     getData() {
       const t = this;
       axios
-        .get("http://localhost:8000/todos/")
+        .get("http://localhost:8000/todos/", { headers: { Authorization: `Bearer ${t.$store.state.accessToken}`}})
         .then((response) => (t.apidata = response.data));
     },
     createTask() {
       const t = this;
-      const data = {
-        owner: 1,
-        name: "markus",
-        description: this.textinput,
-        done: false,
-      };
-      axios.post("http://localhost:8000/todos/", data).then(() => {
+            const data = {
+          "name": t.$store.state.userName,
+          "description": t.textinput,
+          "done": false
+      }
+      console.log(t.$store.state.accessToken)
+      axios.post("http://localhost:8000/todos/", data, { headers: { Authorization: `Bearer ${t.$store.state.accessToken}`}}).then(() => {
         t.getData();
+        t.textinput = "";
       });
     },
     deleteTask(id) {
       const t = this;
-      axios.delete(`http://localhost:8000/todos/${id}/`).then(() => {
+      axios.delete(`http://localhost:8000/todos/${id}/`, { headers: { Authorization: `Bearer ${t.$store.state.accessToken}`}})
+      .then(() => {
         t.getData();
       });
     },
@@ -82,13 +150,12 @@ export default {
       const t = this;
       const idx = t.apidata.findIndex((x) => x.id === id);
       const data = {
-        owner: this.apidata[idx].owner,
         name: this.apidata[idx].name,
         description: this.apidata[idx].description,
         done: !this.apidata[idx].done,
       };
       axios
-        .put(`http://localhost:8000/todos/${id}/`, data)
+        .put(`http://localhost:8000/todos/${id}/`, data, { headers: { Authorization: `Bearer ${t.$store.state.accessToken}`}})
         .then(() => {
           t.getData();
         })
@@ -123,7 +190,7 @@ export default {
 
 .header {
   background-color: darkorange;
-  padding: 20px 50px;
+  padding: 50px 50px;
   color: white;
   text-align: center;
 }
@@ -208,4 +275,18 @@ ul li.checked {
   padding: 10px 0px;
   text-align: center;
 }
+
+#notloggedin {
+  padding: 40px 20px;
+  background: lightgray;
+}
+
+#logout_btn {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  width: 150px;
+}
+
 </style>

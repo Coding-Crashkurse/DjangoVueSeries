@@ -10,11 +10,11 @@ from rest_framework import generics
 
 class TodoView(viewsets.ModelViewSet):
     serializer_class = TodoSerializer
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Todo.objects.all()
-        # queryset = Todo.objects.filter(owner=self.request.user)
+        # queryset = Todo.objects.all()
+        queryset = Todo.objects.filter(owner=self.request.user)
         return queryset
 
 
