@@ -2,8 +2,8 @@
 <nav id="nav">
     <h1>ToDoApp</h1>
     <ul id="navbar">
-        <li><a href="">Home</a></li>
-        <li><a href="">Login</a></li>
+        <li><router-link to="/">Home</router-link></li>
+        <li><router-link to="/login">Login</router-link></li>
     </ul>
 </nav>
 </template>

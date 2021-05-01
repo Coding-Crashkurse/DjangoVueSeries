@@ -11,6 +11,11 @@
             <input type="text" placeholder="Nachname">
             <button type="submit">Registrierung</button>
         </form>
+        <div id="loginlink">
+        <p>Schon einen Account?</p>
+        <p id="link" @click="$store.state.loginView = true">Dann log dich ein</p>
+        </div>
+        
     </div>
 </div>
 
@@ -32,6 +37,7 @@
     background: white;
     border: 1px solid black;
     text-align: center;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }
 
 input {
@@ -52,4 +58,18 @@ button {
   font-size: 16px;
   cursor: pointer;
 }
+
+#loginlink {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+#link {
+    margin-left: 5px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+
 </style>

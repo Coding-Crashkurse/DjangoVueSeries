@@ -2,7 +2,7 @@
   <div class="wrapper">
     <div id="tododiv" class="header">
       <h1 v-if="allTodos">
-        Hallo Placeholder, du hast {{ allTodos }} Todos, {{ openTodos }} davon
+        Hallo {{$store.state.userName}}, du hast {{ allTodos }} Todos, {{ openTodos }} davon
         sind noch offen!
       </h1>
       <h1 v-else>
@@ -118,6 +118,7 @@ export default {
   left: 50%;
   transform: translate(-50%, 0);
   border: 1px solid black;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }
 
 .header {

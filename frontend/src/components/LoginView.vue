@@ -1,17 +1,19 @@
 <template>
 <div>
-  <NavBar></NavBar>
-  <router-view></router-view>
+    <Register v-if="!$store.state.loginView"></Register>
+    <Login v-else></Login>
 </div>
 </template>
 
 <script>
-import NavBar from './components/NavBar.vue'
+import Register from './Register.vue'
+import Login from './Login.vue'
 
 export default {
   name: 'App',
   components: {
-    NavBar,
+    Register,
+    Login
   }
 }
 </script>
